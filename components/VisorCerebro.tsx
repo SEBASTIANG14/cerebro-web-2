@@ -82,6 +82,7 @@ export default function VisorCerebro() {
   // usuario toca el modelo, se apaga y no vuelve sola.
   const [autoRotar, setAutoRotar] = useState(true)
   const [reencuadre, setReencuadre] = useState(0)
+  const [esPantallaCompleta, setEsPantallaCompleta] = useState(false)
   const controls = useRef<Controls>(null)
 
   const estructura = seleccion ? POR_ID.get(seleccion) : undefined
@@ -133,14 +134,71 @@ export default function VisorCerebro() {
     setReencuadre((n) => n + 1)
   }, [])
 
+  const togglePantallaCompleta = useCallback(async () => {
+    try {
+      const doc = document as unknown as {
+        fullscreenElement?: Element
+        webkitFullscreenElement?: Element
+        exitFullscreen?: () => Promise<void>
+        webkitExitFullscreen?: () => Promise<void>
+      }
+      const docEl = document.documentElement as unknown as {
+        requestFullscreen?: () => Promise<void>
+        webkitRequestFullscreen?: () => Promise<void>
+      }
+
+      const estaEnFullscreen = Boolean(doc.fullscreenElement || doc.webkitFullscreenElement)
+
+      if (!estaEnFullscreen) {
+        if (docEl.requestFullscreen) {
+          await docEl.requestFullscreen()
+        } else if (docEl.webkitRequestFullscreen) {
+          await docEl.webkitRequestFullscreen()
+        }
+      } else {
+        if (doc.exitFullscreen) {
+          await doc.exitFullscreen()
+        } else if (doc.webkitExitFullscreen) {
+          await doc.webkitExitFullscreen()
+        }
+      }
+    } catch (error) {
+      console.error('Error al cambiar el modo de pantalla completa:', error)
+    }
+  }, [])
+
+  useEffect(() => {
+    const actualizarEstadoFullscreen = () => {
+      const doc = document as unknown as {
+        fullscreenElement?: Element
+        webkitFullscreenElement?: Element
+      }
+      setEsPantallaCompleta(Boolean(doc.fullscreenElement || doc.webkitFullscreenElement))
+    }
+
+    document.addEventListener('fullscreenchange', actualizarEstadoFullscreen)
+    document.addEventListener('webkitfullscreenchange', actualizarEstadoFullscreen)
+
+    return () => {
+      document.removeEventListener('fullscreenchange', actualizarEstadoFullscreen)
+      document.removeEventListener('webkitfullscreenchange', actualizarEstadoFullscreen)
+    }
+  }, [])
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') volverAlExterior()
       if (e.key === 'r' || e.key === 'R') centrar()
+      if (e.key === 'f' || e.key === 'F') {
+        const tag = (e.target as HTMLElement)?.tagName
+        if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
+          togglePantallaCompleta()
+        }
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [volverAlExterior, centrar])
+  }, [volverAlExterior, centrar, togglePantallaCompleta])
 
   return (
     <div className="visor">
@@ -247,6 +305,23 @@ export default function VisorCerebro() {
         <button className="btn" onClick={centrar} title="Volver al encuadre inicial (R)">
           <span className="btn-largo">Centrar vista</span>
           <span className="btn-corto">Centrar</span>
+        </button>
+        <button
+          className={esPantallaCompleta ? 'btn activo' : 'btn'}
+          onClick={togglePantallaCompleta}
+          aria-pressed={esPantallaCompleta}
+          title={
+            esPantallaCompleta
+              ? 'Salir de pantalla completa (F)'
+              : 'Ver en pantalla completa (F)'
+          }
+        >
+          <span className="btn-largo">
+            {esPantallaCompleta ? 'Salir de pantalla completa' : 'Pantalla completa'}
+          </span>
+          <span className="btn-corto">
+            {esPantallaCompleta ? 'Salir' : 'Pantalla'}
+          </span>
         </button>
         {seleccion && (
           <button className="btn" onClick={volverAlExterior}>
