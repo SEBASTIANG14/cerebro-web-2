@@ -12,7 +12,7 @@ import {
 import * as THREE from 'three'
 import ModeloCerebro from './ModeloCerebro'
 import CamaraAnimada, { VISTA_EXTERIOR, DISTANCIA_EXTERIOR } from './CamaraAnimada'
-import { FichaAnclada, Ficha } from './FichaEstructura'
+import { EtiquetaAnclada, Ficha } from './FichaEstructura'
 import PanelEstructuras from './PanelEstructuras'
 import { ESTRUCTURAS, POR_ID } from '@/lib/estructuras'
 import { FUENTES } from '@/lib/fuentes'
@@ -235,9 +235,7 @@ export default function VisorCerebro() {
             onSeleccionar={seleccionar}
             onHover={setHover}
           />
-          {estructura && (
-            <FichaAnclada estructura={estructura} onCerrar={volverAlExterior} />
-          )}
+          {estructura && <EtiquetaAnclada estructura={estructura} />}
         </Suspense>
 
         <CamaraAnimada
@@ -331,9 +329,10 @@ export default function VisorCerebro() {
         )}
       </div>
 
-      {/* En móvil la ficha ocupa la franja inferior en vez de flotar en 3D */}
+      {/* Ficha fija en una esquina: la cámara centra la estructura, así que
+          el recuadro nunca la tapa. En móvil ocupa la franja inferior. */}
       {estructura && (
-        <div className="ficha-movil">
+        <div className="ficha-esquina" key={estructura.id}>
           <Ficha estructura={estructura} onCerrar={volverAlExterior} />
         </div>
       )}

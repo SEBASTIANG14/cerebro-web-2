@@ -6,7 +6,7 @@ import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { CONTEXTO, POR_ID } from '@/lib/estructuras'
 
-const URL_MODELO = '/cerebro.glb'
+export const URL_MODELO = '/cerebro.glb'
 const SIN_RAYCAST = () => {}
 const RAYCAST_NORMAL = THREE.Mesh.prototype.raycast
 

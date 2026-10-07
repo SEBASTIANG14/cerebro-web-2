@@ -196,62 +196,93 @@ a {
 }
 
 /* ---------------------------------------------------------------- ficha */
-.ancla-wrapper,
-.ancla-ficha {
+/* Etiqueta anclada en 3D: nombre + línea de guía hasta la estructura.
+   --dx / --dy fijan cuánto se aparta el nombre del punto. */
+.etiqueta-wrapper {
   pointer-events: none;
 }
 
-.callout {
+/* Se desvanece cuando la cámara se acerca mucho a la estructura */
+.etiqueta-capa {
+  transition: opacity 0.25s ease;
+}
+
+.etiqueta-capa.oculta {
+  opacity: 0;
+}
+
+.etiqueta {
+  --dx: 160px;
+  --dy: 120px;
   position: relative;
+  width: 0;
+  height: 0;
   pointer-events: none;
-  transform: translate(0, -50%);
+  animation: aparecer-etiqueta 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.callout-punto {
+@keyframes aparecer-etiqueta {
+  from {
+    opacity: 0;
+  }
+}
+
+.etiqueta-linea {
   position: absolute;
-  left: -5px;
-  top: 50%;
-  width: 10px;
-  height: 10px;
-  margin-top: -5px;
-  border-radius: 50%;
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.14);
-}
-
-.callout-linea {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 32px;
-  height: 1.5px;
-  opacity: 0.7;
-}
-
-.callout .ficha {
-  margin-left: 32px;
-  pointer-events: auto;
-}
-
-/* El recuadro salta al otro lado cuando el ancla queda a la derecha */
-.callout.izquierda {
-  transform: translate(-100%, -50%);
-}
-
-.callout.izquierda .ficha {
-  margin-left: 0;
-  margin-right: 32px;
-  border-left: 1px solid var(--borde);
-  border-right: 3px solid var(--acento);
-}
-
-.callout.izquierda .callout-punto {
-  left: auto;
-  right: -5px;
-}
-
-.callout.izquierda .callout-linea {
-  left: auto;
   right: 0;
+  bottom: 0;
+  width: var(--dx);
+  height: var(--dy);
+  overflow: visible;
+}
+
+.etiqueta-linea-fondo {
+  stroke: rgba(5, 9, 15, 0.75);
+  stroke-width: 4;
+}
+
+.etiqueta-linea-trazo {
+  stroke: var(--acento);
+  stroke-width: 1.75;
+  filter: drop-shadow(0 0 3px var(--acento));
+}
+
+.etiqueta-punto {
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--acento);
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 0 2px rgba(5, 9, 15, 0.75), 0 0 10px var(--acento);
+}
+
+.etiqueta-texto {
+  position: absolute;
+  right: var(--dx);
+  bottom: var(--dy);
+  transform: translateY(50%);
+  padding: 5px 11px;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 620;
+  color: #fff;
+  background: rgba(10, 16, 26, 0.88);
+  border: 1.5px solid var(--acento);
+  border-radius: 7px;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--acento) 45%, transparent);
+}
+
+.etiqueta.derecha .etiqueta-linea {
+  right: auto;
+  left: 0;
+}
+
+.etiqueta.derecha .etiqueta-texto {
+  right: auto;
+  left: var(--dx);
 }
 
 .ficha {
@@ -320,6 +351,13 @@ a {
   color: var(--texto);
 }
 
+.ficha-funcion {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #d3dbe6;
+}
+
 .ficha-palabras {
   display: flex;
   flex-wrap: wrap;
@@ -346,8 +384,25 @@ a {
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-.ficha-movil {
-  display: none;
+/* Esquina inferior derecha: libre de panel, botones y pie. La cámara
+   centra la estructura elegida, así que aquí nunca la tapa. */
+.ficha-esquina {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  z-index: 8;
+}
+
+.ficha-esquina .ficha {
+  width: 290px;
+  padding: 13px 15px 14px;
+  border: 1px solid color-mix(in srgb, var(--acento) 45%, transparent);
+  border-left: 3px solid var(--acento);
+  box-shadow: var(--sombra), 0 0 22px color-mix(in srgb, var(--acento) 18%, transparent);
+}
+
+.ficha-esquina .ficha-cab h2 {
+  font-size: 15px;
 }
 
 /* ------------------------------------------------------------- cargando */
@@ -504,28 +559,35 @@ a {
     display: inline;
   }
 
-  .ancla-wrapper {
-    display: none !important;
-  }
-
-  .ficha-movil {
-    display: block;
-    position: absolute;
+  .ficha-esquina {
     left: 12px;
     right: 12px;
     bottom: 68px;
-    z-index: 8;
   }
 
-  .ficha-movil .ficha {
+  .ficha-esquina .ficha {
     width: auto;
     max-height: 25vh;
     overflow-y: auto;
     padding: 10px 12px;
   }
 
-  .ficha-movil .ficha-cab h2 {
+  .ficha-esquina .ficha-cab h2 {
     font-size: 13.5px;
+  }
+
+  .ficha-funcion {
+    font-size: 12px;
+  }
+
+  .etiqueta {
+    --dx: 56px;
+    --dy: 48px;
+  }
+
+  .etiqueta-texto {
+    padding: 4px 9px;
+    font-size: 11.5px;
   }
 
   .pie {

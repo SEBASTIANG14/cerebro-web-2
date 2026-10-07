@@ -33,7 +33,7 @@ export function direccionVista(id: string): THREE.Vector3 {
 }
 
 /** Radio a encuadrar al enfocar una estructura: más pequeña, más cerca. */
-function radioEncuadre(id: string | null): number {
+export function radioEncuadre(id: string | null): number {
   if (!id) return RADIO_EXTERIOR
   const est = POR_ID.get(id)
   if (!est) return RADIO_EXTERIOR
